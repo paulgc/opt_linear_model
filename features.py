@@ -7,7 +7,8 @@ import pandas as pd
 import six
 
 import py_stringmatching as sm
-
+from nw_norm import nw_norm
+from soft_tfidf_norm import soft_tfidf_norm
 
 ## String based similarity measures
 def affine(s1, s2):
@@ -178,7 +179,7 @@ def needleman_wunsch(s1, s2):
         s2 = str(s2)
 
     # Call the function to compute the similarity measure
-    return measure.get_raw_score(s1, s2)
+    return nw_norm(s1, s2)
 
 
 def smith_waterman(s1, s2):
@@ -199,7 +200,7 @@ def smith_waterman(s1, s2):
         s2 = str(s2)
 
     # Call the function to compute the similarity measure
-    return measure.get_raw_score(s1, s2)
+    return (measure.get_raw_score(s1, s2)/min(len(s1), len(s2)))
 
 
 # Token-based measures
@@ -319,7 +320,8 @@ def soft_tfidf(arr1, arr2):
     # Create Soft TFIDF measure object                                               
     measure = sm.SoftTfIdf()                                                        
     # Call the function to compute the Soft TFIDF measure                      
-    return measure.get_raw_score(arr1, arr2)  
+    return soft_tfidf_norm(arr1, arr2)
+#    return measure.get_raw_score(arr1, arr2)  
 
 
 # boolean/string/numeric similarity measure
@@ -348,7 +350,11 @@ def rel_diff(d1, d2):
     else:
         # Compute the relative difference between two numbers
         # ref: https://en.wikipedia.org/wiki/Relative_change_and_difference
-        x = (2*abs(d1 - d2)) / (d1 + d2)
+#        x = (2*abs(d1 - d2)) / (d1 + d2)
+        x = (abs(d1 - d2) / max(abs(d1), abs(d2)))                                        
+        if x <= 10e-5:                                                          
+            x = 0                                                               
+        return 1.0 - x 
         return x
 
 
